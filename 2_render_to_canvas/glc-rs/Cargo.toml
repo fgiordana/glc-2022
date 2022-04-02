@@ -2,7 +2,7 @@
 name = "glc-rs"
 version = "0.1.0"
 authors = ["Francesco Giordana <fgiordana@netflix.com>"]
-edition = "2018"
+edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -11,7 +11,9 @@ crate-type = ["cdylib", "rlib"]
 default = ["console_error_panic_hook"]
 
 [dependencies]
+bevy = { version = "0.6.1", default-features = false, features = ["bevy_winit", "render"] }
 wasm-bindgen = "0.2.63"
+web-sys = { version = "0.3", features = [] }
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
 # logging them with `console.error`. This is great for development, but requires

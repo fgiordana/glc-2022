@@ -1,5 +1,6 @@
 mod utils;
 
+use bevy::prelude::*;
 use wasm_bindgen::prelude::*;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
@@ -9,11 +10,18 @@ use wasm_bindgen::prelude::*;
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[wasm_bindgen]
-extern "C" {
-    fn alert(s: &str);
+pub fn init() {
+    utils::set_panic_hook();
+    utils::log("Initializing glc-rs");
 }
 
 #[wasm_bindgen]
-pub fn greet() {
-    alert("Hello, glc-rs!");
+pub struct Glc {
+    app: App,
+}
+
+impl Glc {
+    pub fn new(canvas_id: &str) {
+        utils::log(&format!("Creating new GLC app with canvas id: {canvas_id}"));
+    }
 }

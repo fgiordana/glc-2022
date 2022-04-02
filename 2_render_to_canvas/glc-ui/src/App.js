@@ -1,9 +1,9 @@
 import React from "react";
 import CssBaseline from '@mui/material/CssBaseline';
 import { Container } from "@mui/material";
-import { greet } from 'glc-wasm';
+import { init } from 'glc-wasm';
 
-greet();
+init();
 
 export default function App() {
     return (
