@@ -13,7 +13,7 @@ default = ["console_error_panic_hook"]
 [dependencies]
 bevy = { version = "0.6.1", default-features = false, features = ["bevy_winit", "render"] }
 wasm-bindgen = "0.2.63"
-web-sys = { version = "0.3", features = [] }
+web-sys = { version = "0.3", features = ["Document", "HtmlCanvasElement", "Window"] }
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
 # logging them with `console.error`. This is great for development, but requires
