@@ -36,7 +36,7 @@ pub fn create_camera(mut commands: Commands) {
                 ))
                 .with_children(|parent| {
                     parent.spawn_bundle(PerspectiveCameraBundle {
-                        transform: Transform::from_xyz(0.0, 0.0, 5.0),
+                        transform: Transform::from_xyz(0.0, 0.0, 20.0),
                         ..Default::default()
                     });
                 });

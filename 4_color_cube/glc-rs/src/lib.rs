@@ -1,4 +1,6 @@
 mod camera;
+mod color_cube;
+mod render;
 mod scene;
 mod utils;
 
@@ -47,10 +49,10 @@ impl Glc {
             color: Color::WHITE,
         })
         .add_plugins(DefaultPlugins)
+        .add_plugin(render::GlcRenderingPlugin)
         .add_event::<camera::CameraMoveEvent>()
         .add_startup_system(scene::create_scene)
         .add_startup_system(camera::create_camera)
-        .add_system(scene::animate)
         .add_system(camera::move_camera)
         .update();
 
