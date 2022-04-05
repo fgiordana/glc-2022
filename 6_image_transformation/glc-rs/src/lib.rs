@@ -28,6 +28,8 @@ pub struct Glc {
     app: App,
     camera_events: Vec<camera::CameraMoveEvent>,
     image_events: Vec<image::SetInputImageEvent>,
+    xform_events: Vec<image::SetColorTransformationEvent>,
+    output_events: Vec<image::SetOutputCanvasEvent>,
 }
 
 #[wasm_bindgen]
@@ -56,18 +58,28 @@ impl Glc {
         .add_plugin(render::GlcRenderingPlugin)
         .add_event::<camera::CameraMoveEvent>()
         .add_event::<image::SetInputImageEvent>()
+        .add_event::<image::SetColorTransformationEvent>()
+        .add_event::<image::SetOutputCanvasEvent>()
         .add_event::<color_cube::UpdateColorCubeEvent>()
+        .add_event::<image::TransformImageEvent>()
+        .add_event::<image::RenderRequest>()
         .add_startup_system(scene::create_scene)
         .add_startup_system(camera::create_camera)
         .add_system(camera::move_camera)
         .add_system(image::set_input_image)
+        .add_system(image::set_color_transformation)
+        .add_system(image::set_output_canvas)
         .add_system(color_cube::update_color_cube)
+        .add_system(image::transform_image)
+        .add_system(image::render_image)
         .update();
 
         Self {
             app,
             camera_events: vec![],
             image_events: vec![],
+            xform_events: vec![],
+            output_events: vec![],
         }
     }
 
@@ -93,6 +105,26 @@ impl Glc {
             events.send(evt.clone());
         }
         self.image_events.clear();
+
+        let mut events = self
+            .app
+            .world
+            .get_resource_mut::<Events<image::SetColorTransformationEvent>>()
+            .unwrap();
+        for evt in self.xform_events.iter() {
+            events.send(evt.clone());
+        }
+        self.xform_events.clear();
+
+        let mut events = self
+            .app
+            .world
+            .get_resource_mut::<Events<image::SetOutputCanvasEvent>>()
+            .unwrap();
+        for evt in self.output_events.iter() {
+            events.send(evt.clone());
+        }
+        self.output_events.clear();
     }
 
     pub fn move_camera(&mut self, rx: f32, ry: f32, z: f32) {
@@ -106,7 +138,10 @@ impl Glc {
         self.image_events.push(image::SetInputImageEvent {
             width: image_data.width(),
             height: image_data.height(),
-            data: image_data.data().0.iter()
+            data: image_data
+                .data()
+                .0
+                .iter()
                 .map(|&x| x as f32 / 255.0)
                 .chunks(4)
                 .into_iter()
@@ -117,7 +152,20 @@ impl Glc {
                         chunk.next().unwrap(),
                         chunk.next().unwrap(),
                     )
-                }).collect(),
+                })
+                .collect(),
+        });
+    }
+
+    pub fn set_output_canvas(&mut self, canvas_id: &str) {
+        self.output_events.push(image::SetOutputCanvasEvent {
+            canvas_id: canvas_id.to_string(),
+        })
+    }
+
+    pub fn rotate(&mut self, r: f32) {
+        self.xform_events.push(image::SetColorTransformationEvent {
+            rotation: Quat::from_axis_angle(Vec3::Y, r.to_radians()),
         });
     }
 }

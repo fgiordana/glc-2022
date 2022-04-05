@@ -6,6 +6,8 @@ import { Glc, init } from 'glc-wasm';
 import InputImage from "./InputImage";
 import ImageGallery from "./ImageGallery";
 import { blobToImageData } from "./utils";
+import ColorTransormation from "./ColorTransformation";
+import OutputImage from "./OutputImage";
 
 init();
 
@@ -33,8 +35,13 @@ export default function App() {
             .then(imageData => glcRef.current.set_input_image(imageData));
     }
 
+    const handleTransform = r => {
+        glcRef.current.rotate(r);
+    }
+
     React.useEffect(() => {
         glcRef.current = Glc.new("glc-canvas");
+        glcRef.current.set_output_canvas("glc-out-canvas");
         requestRef.current = requestAnimationFrame(update);
 
         return () => {
@@ -57,7 +64,13 @@ export default function App() {
                         <Grid item xs={4}>
                             <List>
                                 <ListItem>
+                                    <ColorTransormation onTransform={handleTransform}/>
+                                </ListItem>
+                                <ListItem>
                                     <InputImage imageUrl={inputImage} />
+                                </ListItem>
+                                <ListItem>
+                                    <OutputImage canvasId='glc-out-canvas' />
                                 </ListItem>
                             </List>
                         </Grid>

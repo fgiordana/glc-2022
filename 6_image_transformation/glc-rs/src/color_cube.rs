@@ -63,7 +63,7 @@ pub fn create_color_cube(
 
 pub fn update_color_cube(
     mut events: EventReader<UpdateColorCubeEvent>,
-    image_query: Query<&image::Image>,
+    image_query: Query<&image::Image, With<image::Output>>,
     mut cube_query: Query<(&mut InstancedMesh, &ColorCube)>,
 ) {
     let evts = events.iter().collect::<Vec<_>>();
@@ -71,6 +71,9 @@ pub fn update_color_cube(
         if let Some(image) = image_query.iter().last() {
             let num_pixels = (image.width * image.height) as f32;
             if let Some((mut mesh, cube)) = cube_query.iter_mut().last() {
+                for d in mesh.0.iter_mut() {
+                    d.scale = 0.0;
+                }
                 let r = cube.resolution as usize;
                 let r2 = r * r;
                 let step = 1.0 / (r - 1) as f32;
