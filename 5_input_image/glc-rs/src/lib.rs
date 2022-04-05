@@ -1,12 +1,15 @@
 mod camera;
 mod color_cube;
+mod image;
 mod render;
 mod scene;
 mod utils;
 
 use bevy::ecs::event::Events;
 use bevy::prelude::*;
+use itertools::Itertools;
 use wasm_bindgen::{prelude::*, JsCast};
+use web_sys::ImageData;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
@@ -24,6 +27,7 @@ pub fn init() {
 pub struct Glc {
     app: App,
     camera_events: Vec<camera::CameraMoveEvent>,
+    image_events: Vec<image::SetInputImageEvent>,
 }
 
 #[wasm_bindgen]
@@ -51,14 +55,19 @@ impl Glc {
         .add_plugins(DefaultPlugins)
         .add_plugin(render::GlcRenderingPlugin)
         .add_event::<camera::CameraMoveEvent>()
+        .add_event::<image::SetInputImageEvent>()
+        .add_event::<color_cube::UpdateColorCubeEvent>()
         .add_startup_system(scene::create_scene)
         .add_startup_system(camera::create_camera)
         .add_system(camera::move_camera)
+        .add_system(image::set_input_image)
+        .add_system(color_cube::update_color_cube)
         .update();
 
         Self {
             app,
             camera_events: vec![],
+            image_events: vec![],
         }
     }
 
@@ -74,12 +83,41 @@ impl Glc {
             events.send(evt.clone());
         }
         self.camera_events.clear();
+
+        let mut events = self
+            .app
+            .world
+            .get_resource_mut::<Events<image::SetInputImageEvent>>()
+            .unwrap();
+        for evt in self.image_events.iter() {
+            events.send(evt.clone());
+        }
+        self.image_events.clear();
     }
 
     pub fn move_camera(&mut self, rx: f32, ry: f32, z: f32) {
         self.camera_events.push(camera::CameraMoveEvent {
             rotate: Vec2::new(rx, ry),
             zoom: z,
+        });
+    }
+
+    pub fn set_input_image(&mut self, image_data: ImageData) {
+        self.image_events.push(image::SetInputImageEvent {
+            width: image_data.width(),
+            height: image_data.height(),
+            data: image_data.data().0.iter()
+                .map(|&x| x as f32 / 255.0)
+                .chunks(4)
+                .into_iter()
+                .map(|mut chunk| {
+                    Color::rgba(
+                        chunk.next().unwrap(),
+                        chunk.next().unwrap(),
+                        chunk.next().unwrap(),
+                        chunk.next().unwrap(),
+                    )
+                }).collect(),
         });
     }
 }

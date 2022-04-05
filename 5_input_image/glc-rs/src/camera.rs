@@ -52,7 +52,7 @@ pub fn move_camera(
     )>,
 ) {
     let evts = events.iter().collect::<Vec<_>>();
-    if let Some(evt) = evts.iter().last() {
+    if let Some(evt) = evts.into_iter().last() {
         for mut t in query.q0().iter_mut() {
             t.rotate(Quat::from_axis_angle(Vec3::Y, -evt.rotate.x));
         }

@@ -1,12 +1,16 @@
 import React from "react";
 import CssBaseline from '@mui/material/CssBaseline';
-import { Container } from "@mui/material";
+import { Container, Grid, List, ListItem } from "@mui/material";
 import Viewer from "./Viewer";
 import { Glc, init } from 'glc-wasm';
+import InputImage from "./InputImage";
+import ImageGallery from "./ImageGallery";
+import { blobToImageData } from "./utils";
 
 init();
 
 export default function App() {
+    const [inputImage, setInputImage] = React.useState(null);
     const glcRef = React.useRef();
     const requestRef = React.useRef();
 
@@ -23,6 +27,12 @@ export default function App() {
         }
     }
 
+    const handleSelectImage = ({file, url}) => {
+        setInputImage(url);
+        Promise.resolve(blobToImageData(file))
+            .then(imageData => glcRef.current.set_input_image(imageData));
+    }
+
     React.useEffect(() => {
         glcRef.current = Glc.new("glc-canvas");
         requestRef.current = requestAnimationFrame(update);
@@ -37,6 +47,24 @@ export default function App() {
             <CssBaseline>
                 <Container>
                     <Viewer canvasId='glc-canvas' onMouseMove={handleMouseMove}/>
+                    <Grid 
+                        container
+                        spacing={1}
+                        direction='row'
+                        justifyContent='center'
+                        alignContent='flex-start'
+                    >
+                        <Grid item xs={4}>
+                            <List>
+                                <ListItem>
+                                    <InputImage imageUrl={inputImage} />
+                                </ListItem>
+                            </List>
+                        </Grid>
+                        <Grid item xs={8}>
+                            <ImageGallery onSelectImage={handleSelectImage} />
+                        </Grid>
+                     </Grid>
                 </Container>
             </CssBaseline>
         </React.Fragment>
