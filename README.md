@@ -1,4 +1,4 @@
-# glc-2022
+# Garaje Live Coding (2022)
 
 - [glc-2022](#glc-2022)
   - [0. Environment setup](#0-environment-setup)
